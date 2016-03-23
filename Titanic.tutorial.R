@@ -19,17 +19,17 @@ summary(Titanic.train$Age)
 
 # 'age' variable only had a few values.
 # Now we have a continuous variable which makes drawing proportion tables almost useless, as there may only be one or two passengers for each age!
-# So, let¡¯s create a new variable, Child, to indicate whether the passenger is below the age of 18
+# So, letâ€™s create a new variable, Child, to indicate whether the passenger is below the age of 18
 
 Titanic.train$Child<-0
 Titanic.train$Child[Titanic.train$Age<18] <-1
 aggregate(Survived ~ Child + Sex, data=Titanic.train, FUN=sum)
 aggregate(Survived ~ Child + Sex, data=Titanic.train, FUN=length)
 aggregate(Survived ~ Child + Sex, data=Titanic.train, FUN=function(x) {sum(x)/length(x)})
-# Well, it still appears that if a passenger is female most survive, and if they were male most don¡¯t, regardless of whether they were a child or not.
+# Well, it still appears that if a passenger is female most survive, and if they were male most donâ€™t, regardless of whether they were a child or not.
 
 # While the class variable is limited to a manageable 3 values, the fare is again a continuous variable that needs to be reduced to something that can be easily tabulated.
-# Let¡¯s bin the fares into less than $10, between $10 and $20, $20 to $30 and more than $30 and store it to a new variable:
+# Letâ€™s bin the fares into less than $10, between $10 and $20, $20 to $30 and more than $30 and store it to a new variable:
 Titanic.train$Fare2 <- '30+'
 Titanic.train$Fare2[Titanic.train$Fare <30 & Titanic.train$Fare2 >= 20] <- '20-30'
 Titanic.train$Fare2[Titanic.train$Fare <20 & Titanic.train$Fare2 >= 10] <- '10-20'
@@ -107,7 +107,7 @@ combi$Title <- sub(' ', '', combi$Title)
 # This is a nice new attribute.
 table(combi$Title)
 
-# there are a few very rare titles in here that won¡¯t give our model much to work with, so let¡¯s combine a few of the most unusual ones
+# there are a few very rare titles in here that wonâ€™t give our model much to work with, so letâ€™s combine a few of the most unusual ones
 combi$Title[combi$Title %in% c('Mme', 'Mlle')] <- 'Mlle'
 combi$Title[combi$Title %in% c('Capt', 'Don', 'Major', 'Sir')] <- 'Sir'
 combi$Title[combi$Title %in% c('Dona', 'Lady', 'the Countess', 'Jonkheer')] <- 'Lady'
@@ -123,11 +123,11 @@ combi$Surname <- sapply(combi$Name, FUN=function(x) {strsplit(x, split='[,.]')[[
 # we just thought about a large family having issues getting to lifeboats together,
 # but maybe specific families had more trouble than others?
 # We could try to extract the Surname of the passengers and group them to find families.
-# No two family-Johnson¡¯s should have the same FamilySize variable on such a small ship. So let¡¯s first extract the passengers¡¯ last names.
+# No two family-Johnsonâ€™s should have the same FamilySize variable on such a small ship. So letâ€™s first extract the passengersâ€™ last names.
 combi$Surname <- sapply(combi$Name, FUN=function(x) {strsplit(x, split='[,.]')[[1]][1]})
 combi$FamilyID <- paste(as.character(combi$FamilySize), combi$Surname, sep="")
 
-# let¡¯s knock out any family size of two or less and call it a ¡°small¡± family. This would fix the Johnson problem too.
+# letâ€™s knock out any family size of two or less and call it a â€œsmallâ€ family. This would fix the Johnson problem too.
 combi$FamilyID[combi$FamilySize <= 2] <- 'Small'
 table(combi$FamilyID)
 famIDs <- data.frame(table(combi$FamilyID))
@@ -136,7 +136,7 @@ famIDs <- famIDs[famIDs$Freq <= 2,]
 
 # Given we were originally hypothesising that large families might have trouble sticking together in the panic
 # We then need to overwrite any family IDs in our dataset for groups that were not correctly identified and finally convert it to a factor
-# let¡¯s subset this dataframe to show only those unexpectedly small FamilyID groups.
+# letâ€™s subset this dataframe to show only those unexpectedly small FamilyID groups.
 
 combi$FamilyID[combi$FamilyID %in% famIDs$Var1] <- 'Small'
 combi$FamilyID <- factor(combi$FamilyID)
@@ -156,7 +156,7 @@ fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked + T
 
 summary(combi$Age)
 
-# We now also want to use the method=¡±anova¡± version of our decision tree, as we are not trying to predict a category any more, but a continuous variable.
+# We now also want to use the method=â€anovaâ€ version of our decision tree, as we are not trying to predict a category any more, but a continuous variable.
 Agefit <- rpart(Age ~ Pclass + Sex + SibSp + Parch + Fare + Embarked + Title + FamilySize,
                 data=combi[!is.na(combi$Age),], method="anova") 
 combi$Age[is.na(combi$Age)] <- predict(Agefit, combi[is.na(combi$Age),]) # Imputate missing values with predited values.
@@ -171,6 +171,7 @@ combi$Embarked <- factor(combi$Embarked)
 # so we need to norrow it down.
 summary(combi$Fare)
 which(is.na(combi$Fare))
+combi$Fare[1044] <- median(combi$Fare, na.rm=TRUE)
 combi$FamilyID2 <- combi$FamilyID
 combi$FamilyID2 <- as.character(combi$FamilyID2)
 combi$FamilyID2[combi$FamilySize <= 3] <- 'Small'
@@ -189,7 +190,7 @@ write.csv(submit, file = "firstforest.csv", row.names = FALSE)
 
 #0.79426
 
-# Let¡¯s try a forest of conditional inference trees. 
+# Letâ€™s try a forest of conditional inference trees. 
 # They make their decisions in slightly different ways, using a statistical test rather than a purity measure,
 # but the basic construction of each tree is fairly similar.
 
